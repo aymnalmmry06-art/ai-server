@@ -18,7 +18,7 @@ app.post("/ask-gemini", async (req, res) => {
       return res.status(400).json({ error: "لا يوجد نص مرسل" });
     }
 
-    // استدعاء الموديل (تم تحديث الاسم إلى الإصدار الأحدث والأكثر استقراراً لضمان عمله من سيرفرات Render)
+    // تم التحديث إلى gemini-1.5-flash-latest لضمان التوافق مع سيرفرات Render
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash-latest",
       systemInstruction:
@@ -35,13 +35,13 @@ app.post("/ask-gemini", async (req, res) => {
     console.error("حدث خطأ:", error);
     res.status(500).json({
       error:
-        "فشل الاتصال بالذكاء الاصطناعي. تم رصد خطأ في استدعاء الموديل، تأكد من تحديث اسم الموديل في الكود.",
+        "فشل في استدعاء الذكاء الاصطناعي. يرجى التأكد من إعدادات الموديل والمفتاح.",
     });
   }
 });
 
-// ملاحظة: المنفذ يتغير تلقائياً عند رفعه على استضافة مثل Render
-const PORT = process.env.PORT || 3000;
+// المنفذ الخاص ببيئة Render
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
