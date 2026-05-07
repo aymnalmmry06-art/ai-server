@@ -20,7 +20,7 @@ app.post("/ask-gemini", async (req, res) => {
 
     // استدعاء الموديل (استخدمنا gemini-1.5-flash للتوافق العالمي وضمان السرعة)
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-pro",
       systemInstruction:
         "أنت المساعد الذكي لموقع كونتننتال (كون إيليت) في صنعاء. أجب بذكاء ومهنية وباللغة العربية.",
     });
