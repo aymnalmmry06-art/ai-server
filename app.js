@@ -159,7 +159,6 @@ window.addEventListener("load", () => {
 
 // FAQ Accordion
 document.querySelectorAll(".faq-question").forEach((q) => {
-  // إضافة مستمع الحدث لفتح وإغلاق الأسئلة الشائعة
   q.addEventListener("click", () => {
     q.parentElement.classList.toggle("active");
   });
@@ -205,23 +204,21 @@ backToTop.onclick = function () {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-// Statistics Counter - تحديث السرعة والتحكم في التشغيل
+// Statistics Counter
 const startCounters = () => {
   document.querySelectorAll(".counter").forEach((counter) => {
-    // نتحقق مما إذا كان قد بدأ العد بالفعل لتجنب التكرار
     if (counter.dataset.started === "true") return;
     counter.dataset.started = "true";
 
     const target = +counter.getAttribute("data-target");
-    // زيادة الـ duration تجعل الحركة أبطأ (2000ms = ثانيتين)
     const duration = 2500;
-    const step = target / (duration / 40); // 40ms هو وقت التأخير بين كل تحديث
+    const step = target / (duration / 40);
 
     const update = () => {
       const count = +counter.innerText.replace("+", "");
       if (count < target) {
         counter.innerText = Math.ceil(count + step) + "+";
-        setTimeout(update, 40); // تأخير أطول قليلاً لسرعة أهدأ
+        setTimeout(update, 40);
       } else {
         counter.innerText = target + "+";
       }
@@ -236,7 +233,6 @@ const observer = new IntersectionObserver(
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         entry.target.classList.add("active");
-        // يبدأ العد فقط عندما يظهر العنصر في مستوى الرؤية
         if (
           entry.target.classList.contains("counter") ||
           entry.target.querySelector(".counter")
@@ -246,12 +242,9 @@ const observer = new IntersectionObserver(
       }
     });
   },
-  {
-    threshold: 0.5, // يبدأ فقط عندما يظهر 50% من القسم لتأكيد الرؤية
-  },
+  { threshold: 0.5 },
 );
 
-// تأكد من مراقبة العناصر الصحيحة
 document
   .querySelectorAll(".reveal, .counter")
   .forEach((el) => observer.observe(el));
@@ -267,8 +260,7 @@ setInterval(() => {
   }
 }, 5000);
 
-/* --- CONTINENTAL CHATBOT LOGIC (GEMINI INTEGRATED VIA REMOTE SERVER) --- */
-// تم استبدال الرابط المحلي برابط سيرفر Render الخاص بك لتجاوز الحظر في اليمن
+/* --- CHATBOT LOGIC --- */
 const REMOTE_SERVER_URL = "https://ai-server-jqbp.onrender.com/ask-gemini";
 
 function toggleChat() {
@@ -305,12 +297,9 @@ async function sendChatMessage() {
     );
 
     try {
-      // الاتصال بسيرفر Render العالمي لتجاوز قيود المواقع الجغرافية
       const response = await fetch(REMOTE_SERVER_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: `You are a professional business consultant for "Continental". 
                    The user is asking: ${message}. 
@@ -318,42 +307,34 @@ async function sendChatMessage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Remote server communication failed");
-      }
-
       const data = await response.json();
-
       const loadingElement = document.getElementById(loadingId);
       if (loadingElement) loadingElement.remove();
 
       if (data.text) {
         addMessage(data.text, "bot");
-      } else {
-        throw new Error("Invalid response from remote server");
+      } else if (data.error) {
+        addMessage(
+          currentLang === "ar"
+            ? "حدث خطأ في السيرفر: " + data.error
+            : "Server error: " + data.error,
+          "bot",
+        );
       }
     } catch (error) {
-      console.error("Connection Error:", error);
       const loadingElement = document.getElementById(loadingId);
       if (loadingElement) loadingElement.remove();
-
-      const errorMsg =
-        currentLang === "ar"
-          ? "عذراً، حدث خطأ في الاتصال بالسيرفر العالمي. يرجى المحاولة لاحقاً."
-          : "Sorry, there was an error connecting to the remote server. Please try again later.";
-      addMessage(errorMsg, "bot");
+      addMessage(
+        currentLang === "ar" ? "خطأ في الاتصال بالسيرفر." : "Connection error.",
+        "bot",
+      );
     }
   }
 }
 
-// دعم الإرسال عبر مفتاح Enter
-document
-  .getElementById("chatInput")
-  ?.addEventListener("keypress", function (e) {
-    if (e.key === "Enter") {
-      sendChatMessage();
-    }
-  });
+document.getElementById("chatInput")?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendChatMessage();
+});
 
 function addMessage(text, sender, id = null) {
   const messagesDiv = document.getElementById("chatMessages");
